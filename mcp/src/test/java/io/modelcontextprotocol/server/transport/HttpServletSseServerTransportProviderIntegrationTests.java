@@ -3,6 +3,10 @@
  */
 package io.modelcontextprotocol.server.transport;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,8 +43,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-
-import org.springframework.web.client.RestClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -515,13 +517,20 @@ class HttpServletSseServerTransportProviderIntegrationTests {
 		var callResponse = new McpSchema.CallToolResult(List.of(new McpSchema.TextContent("CALL RESPONSE")), null);
 		McpServerFeatures.SyncToolSpecification tool1 = new McpServerFeatures.SyncToolSpecification(
 				new McpSchema.Tool("tool1", "tool1 description", emptyJsonSchema), (exchange, request) -> {
-					// perform a blocking call to a remote service
-					String response = RestClient.create()
-						.get()
-						.uri("https://raw.githubusercontent.com/modelcontextprotocol/java-sdk/refs/heads/main/README.md")
-						.retrieve()
-						.body(String.class);
-					assertThat(response).isNotBlank();
+					// perform a blocking call to a remote service using HttpClient
+					try {
+						HttpClient client = HttpClient.newHttpClient();
+						HttpRequest httpRequest = HttpRequest.newBuilder()
+							.uri(URI.create(
+									"https://raw.githubusercontent.com/modelcontextprotocol/java-sdk/refs/heads/main/README.md"))
+							.timeout(Duration.ofSeconds(30))
+							.build();
+						HttpResponse<String> response = client.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+						assertThat(response.body()).isNotBlank();
+					}
+					catch (Exception e) {
+						throw new RuntimeException("HTTP request failed", e);
+					}
 					return callResponse;
 				});
 
@@ -551,13 +560,20 @@ class HttpServletSseServerTransportProviderIntegrationTests {
 		var callResponse = new McpSchema.CallToolResult(List.of(new McpSchema.TextContent("CALL RESPONSE")), null);
 		McpServerFeatures.SyncToolSpecification tool1 = new McpServerFeatures.SyncToolSpecification(
 				new McpSchema.Tool("tool1", "tool1 description", emptyJsonSchema), (exchange, request) -> {
-					// perform a blocking call to a remote service
-					String response = RestClient.create()
-						.get()
-						.uri("https://raw.githubusercontent.com/modelcontextprotocol/java-sdk/refs/heads/main/README.md")
-						.retrieve()
-						.body(String.class);
-					assertThat(response).isNotBlank();
+					// perform a blocking call to a remote service using HttpClient
+					try {
+						HttpClient client = HttpClient.newHttpClient();
+						HttpRequest httpRequest = HttpRequest.newBuilder()
+							.uri(URI.create(
+									"https://raw.githubusercontent.com/modelcontextprotocol/java-sdk/refs/heads/main/README.md"))
+							.timeout(Duration.ofSeconds(30))
+							.build();
+						HttpResponse<String> response = client.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+						assertThat(response.body()).isNotBlank();
+					}
+					catch (Exception e) {
+						throw new RuntimeException("HTTP request failed", e);
+					}
 					return callResponse;
 				});
 
@@ -569,13 +585,20 @@ class HttpServletSseServerTransportProviderIntegrationTests {
 			.build();
 
 		try (var mcpClient = clientBuilder.toolsChangeConsumer(toolsUpdate -> {
-			// perform a blocking call to a remote service
-			String response = RestClient.create()
-				.get()
-				.uri("https://raw.githubusercontent.com/modelcontextprotocol/java-sdk/refs/heads/main/README.md")
-				.retrieve()
-				.body(String.class);
-			assertThat(response).isNotBlank();
+			// perform a blocking call to a remote service using HttpClient
+			try {
+				HttpClient client = HttpClient.newHttpClient();
+				HttpRequest httpRequest = HttpRequest.newBuilder()
+					.uri(URI.create(
+							"https://raw.githubusercontent.com/modelcontextprotocol/java-sdk/refs/heads/main/README.md"))
+					.timeout(Duration.ofSeconds(30))
+					.build();
+				HttpResponse<String> response = client.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+				assertThat(response.body()).isNotBlank();
+			}
+			catch (Exception e) {
+				throw new RuntimeException("HTTP request failed", e);
+			}
 			rootsRef.set(toolsUpdate);
 		}).build()) {
 

@@ -219,6 +219,11 @@ public class HttpServletSseServerTransportProvider extends HttpServlet implement
 				writer);
 
 		// Create a new session using the session factory
+		if (sessionFactory == null) {
+			logger.error("Session factory is null, cannot create session for {}", sessionId);
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Session factory not initialized");
+			return;
+		}
 		McpServerSession session = sessionFactory.create(sessionTransport);
 		this.sessions.put(sessionId, session);
 

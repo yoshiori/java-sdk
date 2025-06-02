@@ -183,6 +183,8 @@ public class McpAsyncServer {
 		notificationHandlers.put(McpSchema.METHOD_NOTIFICATION_ROOTS_LIST_CHANGED,
 				asyncRootsListChangedNotificationHandler(rootsChangeConsumers));
 
+		// Set the session factory with all handlers configured to prevent race conditions
+		// with HTTP transport providers that might start receiving requests immediately
 		mcpTransportProvider.setSessionFactory(
 				transport -> new McpServerSession(UUID.randomUUID().toString(), requestTimeout, transport,
 						this::asyncInitializeRequestHandler, Mono::empty, requestHandlers, notificationHandlers));
